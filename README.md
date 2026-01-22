@@ -1,11 +1,7 @@
-# Easygo
+# Netpoll
 
-[![GoDoc][godoc:image]][godoc:url]
-[![Travis][travis:image]][travis:url]
+Adaptation of https://github.com/mailru/easygo/ as a Go module and patched
+to use `syscall.Conn` instead of `os.File`, to avoid blocking/deadline issues
+associated with using a File to access the Fd.
 
-> Tools for building go apps.
-
-[godoc:image]:  https://godoc.org/github.com/mailru/easygo?status.svg
-[godoc:url]:    https://godoc.org/github.com/mailru/easygo
-[travis:image]: https://travis-ci.org/mailru/easygo.svg?branch=master
-[travis:url]:   https://travis-ci.org/mailru/easygo 
+Minor breaking API changes, methods explicitly take a `syscall.Conn`.

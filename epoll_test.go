@@ -1,3 +1,4 @@
+//go:build linux
 // +build linux
 
 package netpoll
@@ -51,17 +52,29 @@ func TestEpollDel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f, err := conn.(filer).File()
+	tcpConn := conn.(*net.TCPConn)
+	sc, err := tcpConn.SyscallConn()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("SyscallConn: %s", err)
 	}
 
-	err = s.Add(int(f.Fd()), EPOLLIN, func(events EpollEvent) {})
+	err = sc.Control(func(fd uintptr) {
+		err = s.Add(int(fd), EPOLLIN, func(events EpollEvent) {})
+		if err != nil {
+			t.Errorf("Add: %s", err)
+		}
+	})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Control: %s", err)
 	}
-	if err = s.Del(int(f.Fd())); err != nil {
-		t.Errorf("unexpected error: %s", err)
+
+	err = sc.Control(func(fd uintptr) {
+		if err = s.Del(int(fd)); err != nil {
+			t.Errorf("Del: %s", err)
+		}
+	})
+	if err != nil {
+		t.Fatalf("Control: %s", err)
 	}
 
 	if err = s.Close(); err != nil {

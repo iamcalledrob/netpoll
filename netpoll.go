@@ -8,15 +8,12 @@ interfaces.
 
 To get more info you could look at operating system API documentation of
 particular netpoll implementations:
-	- epoll on linux;
-	- kqueue on bsd;
+  - epoll on linux;
+  - kqueue on bsd;
 
 The Handle function creates netpoll.Desc for further use in Poller's methods:
 
-	desc, err := netpoll.Handle(conn, netpoll.EventRead | netpoll.EventEdgeTriggered)
-	if err != nil {
-		// handle error
-	}
+	desc := netpoll.Handle(conn, netpoll.EventRead | netpoll.EventEdgeTriggered)
 
 The Poller describes os-dependent network poller:
 
@@ -26,7 +23,7 @@ The Poller describes os-dependent network poller:
 	}
 
 	// Get netpoll descriptor with EventRead|EventEdgeTriggered.
-	desc := netpoll.Must(netpoll.HandleRead(conn))
+	desc := netpoll.HandleRead(conn)
 
 	poller.Start(desc, func(ev netpoll.Event) {
 		if ev&netpoll.EventReadHup != 0 {
@@ -51,9 +48,9 @@ import (
 )
 
 var (
-	// ErrNotFiler is returned by Handle* functions to indicate that given
+	// ErrNotSyscallConn is returned by Handle* functions to indicate that given
 	// net.Conn does not provide access to its file descriptor.
-	ErrNotFiler = fmt.Errorf("could not get file descriptor")
+	ErrNotSyscallConn = fmt.Errorf("conn does not support getting file descriptor")
 
 	// ErrClosed is returned by Poller methods to indicate that instance is
 	// closed and operation could not be processed.
@@ -146,8 +143,6 @@ type Poller interface {
 	Start(*Desc, CallbackFn) error
 
 	// Stop removes desc from the observation list.
-	//
-	// Note that it does not call desc.Close().
 	Stop(*Desc) error
 
 	// Resume enables observation of desc.

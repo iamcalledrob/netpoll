@@ -1,3 +1,4 @@
+//go:build linux || darwin || dragonfly || freebsd || netbsd || openbsd
 // +build linux darwin dragonfly freebsd netbsd openbsd
 
 package netpoll
@@ -43,7 +44,13 @@ func TestPollerReadOnce(t *testing.T) {
 		mu     sync.Mutex
 		events []Event
 	)
-	desc := Must(HandleReadOnce(conn))
+
+	sc, ok := conn.(syscall.Conn)
+	if !ok {
+		t.Fatal("conn not a syscall.Conn")
+	}
+
+	desc := HandleReadOnce(sc)
 	err = poller.Start(desc, func(event Event) {
 		mu.Lock()
 		events = append(events, event)
@@ -148,7 +155,12 @@ func TestPollerWriteOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	desc := Must(HandleWriteOnce(wc))
+	sc, ok := wc.(syscall.Conn)
+	if !ok {
+		t.Fatal("wc not a syscall.Conn")
+	}
+
+	desc := HandleWriteOnce(sc)
 	err = poller.Start(desc, func(e Event) {
 		log.Printf("received event from poller: %s", e)
 		atomic.AddUint32(writeEvents, 1)
