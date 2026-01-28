@@ -24,8 +24,8 @@ type poller struct {
 
 // Start implements Poller.Start() method.
 func (ep poller) Start(desc *Desc, cb CallbackFn) error {
-	return desc.withFd(func(fd uintptr) error {
-		return ep.Add(int(fd), toEpollEvent(desc.event),
+	return desc.withFd(func(fd int) error {
+		return ep.Add(fd, toEpollEvent(desc.event),
 			func(ep EpollEvent) {
 				var event Event
 
@@ -56,15 +56,15 @@ func (ep poller) Start(desc *Desc, cb CallbackFn) error {
 
 // Stop implements Poller.Stop() method.
 func (ep poller) Stop(desc *Desc) error {
-	return desc.withFd(func(fd uintptr) error {
-		return ep.Del(int(fd))
+	return desc.withFd(func(fd int) error {
+		return ep.Del(fd)
 	})
 }
 
 // Resume implements Poller.Resume() method.
 func (ep poller) Resume(desc *Desc) error {
-	return desc.withFd(func(fd uintptr) error {
-		return ep.Mod(int(fd), toEpollEvent(desc.event))
+	return desc.withFd(func(fd int) error {
+		return ep.Mod(fd, toEpollEvent(desc.event))
 	})
 }
 

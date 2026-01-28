@@ -22,9 +22,9 @@ type poller struct {
 }
 
 func (p poller) Start(desc *Desc, cb CallbackFn) error {
-	return desc.withFd(func(fd uintptr) error {
+	return desc.withFd(func(fd int) error {
 		n, events := toKevents(desc.event, true)
-		return p.Add(int(fd), events, n, func(kev Kevent) {
+		return p.Add(fd, events, n, func(kev Kevent) {
 			var (
 				event Event
 
@@ -63,12 +63,12 @@ func (p poller) Start(desc *Desc, cb CallbackFn) error {
 }
 
 func (p poller) Stop(desc *Desc) error {
-	return desc.withFd(func(fd uintptr) error {
+	return desc.withFd(func(fd int) error {
 		n, events := toKevents(desc.event, false)
-		if err := p.Del(int(fd)); err != nil {
+		if err := p.Del(fd); err != nil {
 			return err
 		}
-		if err := p.Mod(int(fd), events, n); err != nil && err != ErrNotRegistered {
+		if err := p.Mod(fd, events, n); err != nil && err != ErrNotRegistered {
 			return err
 		}
 		return nil
@@ -76,9 +76,9 @@ func (p poller) Stop(desc *Desc) error {
 }
 
 func (p poller) Resume(desc *Desc) error {
-	return desc.withFd(func(fd uintptr) error {
+	return desc.withFd(func(fd int) error {
 		n, events := toKevents(desc.event, true)
-		return p.Mod(int(fd), events, n)
+		return p.Mod(fd, events, n)
 	})
 }
 

@@ -50,7 +50,12 @@ func TestPollerReadOnce(t *testing.T) {
 		t.Fatal("conn not a syscall.Conn")
 	}
 
-	desc := HandleReadOnce(sc)
+	var desc *Desc
+	desc, err = HandleReadOnce(sc)
+	if err != nil {
+		t.Fatalf("creating desc: %s", err)
+	}
+
 	err = poller.Start(desc, func(event Event) {
 		mu.Lock()
 		events = append(events, event)
@@ -160,7 +165,12 @@ func TestPollerWriteOnce(t *testing.T) {
 		t.Fatal("wc not a syscall.Conn")
 	}
 
-	desc := HandleWriteOnce(sc)
+	var desc *Desc
+	desc, err = HandleWriteOnce(sc)
+	if err != nil {
+		t.Fatalf("creating desc: %s", err)
+	}
+
 	err = poller.Start(desc, func(e Event) {
 		log.Printf("received event from poller: %s", e)
 		atomic.AddUint32(writeEvents, 1)
