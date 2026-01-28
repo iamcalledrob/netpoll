@@ -50,7 +50,7 @@ func Handle(conn syscall.Conn, event Event) (*Desc, error) {
 	}
 
 	if dupErr != nil {
-		return nil, fmt.Errorf("duplicating fd: %w", err)
+		return nil, fmt.Errorf("duplicating fd: %w", dupErr)
 	}
 
 	return &Desc{
